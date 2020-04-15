@@ -192,7 +192,7 @@
         var zoom = {};
         var drag = {};
         var svg = {};
-
+        var energy;
 
         //Zoom function:
         //Programmatic Pan+Zoom III (Mike Bostock’s Block 7ec977c95910dd026812)
@@ -231,7 +231,7 @@
         }
 
         function showSankey(energy) {
-            console.log(energy)
+            // console.log(energy)
             $('.d3-tip-nodes').remove(); //clear olds tips
             var chartBox = d3.select("#sankey").node().getBoundingClientRect();
             var margin = { top: 10, right: 10, bottom: 10, left: 20 },
@@ -279,8 +279,9 @@
                     '</div>';
                 return html;
             });
-
+            console.log(tipNodes)
             tipNodes.html(function (d) {
+                console.log(d3.entries(d));
                 var object = d3.entries(d),
                     nodeName = object[1].value,
                     linksTo = object[3].value,
@@ -362,7 +363,7 @@
                 .nodes(energy.nodes)
                 .links(energy.links)
                 .layout(32);
-
+            console.log(sankey)
             var fontScale = d3.scale.linear().domain(d3.extent(energy.nodes, function (d) { return d.value })).range([18, 30]);
 
             var link = svg.append("g").selectAll(".link")
@@ -474,30 +475,45 @@
             var graph = { "nodes": [], "links": [] };
             d3.csv("sankey.csv", function (error, data) {
                 //set up graph in same style as original example but empty
-                let i = 0;
+                let i = 0; let alreadyIn = [];
                 data.forEach(function (d) {
-                            graph.nodes.push({ "node": i, "name": d.source });
-                            graph.links.push({
-                                "source": d.source,
-                                "target": d.target,
-                                "value": +d.value
-
-                            });
-                            i ++;
-                            console.log(d.source.substring(0,6))
-                            if(d.source.substring(0,6)=="Layer2"){
-                                graph.nodes.push({ "node": i, "name": d.target});
-                            i++;
-                            }
-
-                        })
+                    let isIn = false;
+                    // alreadyIn.forEach(function (e){if()})
+                    // console.log(!(alreadyIn.includes(d.source)));
+                    if (!(alreadyIn.includes(d.source))) {
+                        graph.nodes.push({ "node": i, "name": d.source, "color": getRandomColor() });
+                        alreadyIn.push(d.source);
+                        i++;
+                    }
+                    if (!(alreadyIn.includes(d.target))) {
+                        graph.nodes.push({ "node": i, "name": d.target, "color": getRandomColor() });
+                        alreadyIn.push(d.target);
+                        i++;
+                    }
+                }); let tgt,src;
+                data.forEach(function (d) {
+                    graph.nodes.forEach(function (e) {
+                        if (d.target == e.name){
+                            tgt = e.node;
+                        }
+                        if(d.source == e.name){
+                            src =e.node;
+                        }
+                    });
+                    graph.links.push({
+                        'source':src,
+                        'target':tgt,
+                        'value':parseInt(d.value)
+                    });
+                });
             });
             console.log(graph)
             return graph;
         };
 
-
-        showSankey(getData());
+     energy = getData();
+     console.log(energy);
+        showSankey(energy);
     </script>
 </body>
 
