@@ -13,11 +13,7 @@
     text-shadow: 0 1px 0 #fff;
   }
 
-  .link {
-    fill: none;
-    stroke: #000;
-    stroke-opacity: .2;
-  }
+
 
   .linkC1 {
     fill: none;
@@ -38,9 +34,14 @@
     stroke-opacity: .2;
   }
 
-  .link,
-  .linkC1,
-  .linkC2,
+  .linkC1:hover {
+    stroke-opacity: .5;
+  }
+
+  .linkC2:hover {
+    stroke-opacity: .5;
+  }
+
   .linkC3:hover {
     stroke-opacity: .5;
   }
@@ -51,8 +52,8 @@
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="sankey.js"></script>
   <script>
-
-    var units = "Widgets";
+    var Layers;
+    var units = "éléments";
 
     // set the dimensions and margins of the graph
     var margin = {
@@ -133,7 +134,8 @@
         .layout(32);
 
       // add in the links
-      var link = svg.append("g").selectAll(".link")
+      /*
+           var link = svg.append("g").selectAll(".link")
         .data(graph.links)
         .enter().append("path")
         .attr("class", "link")
@@ -141,6 +143,39 @@
         .style("stroke-width", function (d) { return Math.max(1, d.dy); })
         .sort(function (a, b) { return b.dy - a.dy; });
 
+      
+      */
+
+      function nbLayer() {
+        var dejavu = []; var cpt = 0;
+        graph.nodes.forEach(e => {
+          let name = e.name.split(".");
+          if (!(dejavu.includes(name[0]))) {
+            dejavu.push(name[0]); cpt++;
+          }
+        });
+        return [cpt,dejavu];
+      }
+      Layers = nbLayer();
+      
+
+      var link = svg.append("g").selectAll(".link")
+        .data(graph.links)
+        .enter().append("path")
+        .attr("class", function (d) {
+          if (d.clss == "C1") {
+            return "linkC1";
+          }
+          if (d.clss == "C2") {
+            return "linkC2";
+          }
+          if (d.clss == "C3") {
+            return "linkC3";
+          }
+        })
+        .attr("d", path)
+        .style("stroke-width", function (d) { return Math.max(1, d.dy); })
+        .sort(function (a, b) { return b.dy - a.dy; });
       // add the link titles
       link.append("title")
         .text(function (d) {
@@ -170,7 +205,16 @@
         .attr("height", function (d) { return d.dy; })
         .attr("width", sankey.nodeWidth())
         .style("fill", function (d) {
-          return d.color = color(d.name.replace(/ .*/, ""));
+          if (d.name.includes("Layer1")) {
+            return "#120011";
+          }
+          if (d.name.includes("Layer2")) {
+            return "#380033";
+          }
+          if (d.name.includes("Layer3")) {
+            return "#5e0056";
+          }
+
         })
         .style("stroke", function (d) {
           return d3.rgb(d.color).darker(2);
@@ -187,7 +231,7 @@
         .attr("dy", ".35em")
         .attr("text-anchor", "end")
         .attr("transform", null)
-        .text(function (d) { return d.name; })
+        .text(function (d) { let name = d.name.split("."); return name[1]; })
         .filter(function (d) { return d.x < width / 2; })
         .attr("x", 6 + sankey.nodeWidth())
         .attr("text-anchor", "start");
@@ -205,6 +249,8 @@
         link.attr("d", path);
       }
     });
+    // var elem = document.createElement('div').setAttribute("class",".layer")
+    // document.body.appendChild(elem)
 
   </script>
 
