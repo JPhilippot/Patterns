@@ -15,23 +15,81 @@
 
 
 
+  .linkC0 {
+    fill: none;
+    stroke: #b0000b;
+    stroke-opacity: .3;
+  }
+
   .linkC1 {
     fill: none;
-    stroke: #f91212;
-    stroke-opacity: .2;
+    stroke: #527fff;
+    stroke-opacity: .3;
   }
 
   .linkC2 {
     fill: none;
-    stroke: #FFAA00;
-    stroke-opacity: .2;
+    stroke: #ff5a0c;
+    stroke-opacity: .3;
   }
 
 
   .linkC3 {
     fill: none;
-    stroke: #0055FF;
-    stroke-opacity: .2;
+    stroke: #65c347;
+    stroke-opacity: .3;
+  }
+
+
+  .linkC4 {
+    fill: none;
+    stroke: #8c007c;
+    stroke-opacity: .3;
+  }
+
+
+  .linkC5 {
+    fill: none;
+    stroke: #cbbf2d;
+    stroke-opacity: .3;
+  }
+
+  .linkC6 {
+    fill: none;
+    stroke: #007840;
+    stroke-opacity: .3;
+  }
+
+  .linkC7 {
+    fill: none;
+    stroke: #e33782;
+    stroke-opacity: .3;
+  }
+
+
+  .linkC8 {
+    fill: none;
+    stroke: #bb52d1;
+    stroke-opacity: .3;
+  }
+
+  .linkC9 {
+    fill: none;
+    stroke: #00088b;
+    stroke-opacity: .3;
+  }
+
+  .linkC10 {
+    fill: none;
+    stroke: #e24942;
+    stroke-opacity: .3;
+  }
+
+
+  .linkC11 {
+    fill: none;
+    stroke: #180101;
+    stroke-opacity: .3;
   }
 
   .linkC1:hover {
@@ -39,11 +97,47 @@
   }
 
   .linkC2:hover {
-    stroke-opacity: .5;
+    stroke-opacity: .7;
   }
 
   .linkC3:hover {
-    stroke-opacity: .5;
+    stroke-opacity: .7;
+  }
+
+  .linkC4:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC5:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC6:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC7:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC8:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC9:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC0:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC10:hover {
+    stroke-opacity: .7;
+  }
+
+  .linkC11:hover {
+    stroke-opacity: .7;
   }
 </style>
 
@@ -54,7 +148,6 @@
   <script>
     var Layers;
     var units = "éléments";
-
     // set the dimensions and margins of the graph
     var margin = {
       top: window.innerHeight * 0.05, right: window.innerWidth * 0.05
@@ -85,58 +178,44 @@
     var path = sankey.link();
 
     // load the data
-    d3.csv("sankey.csv", function (error, data) {
-      console.log(data)
-      //set up graph in same style as original example but empty
-      graph = { "nodes": [], "links": [] };
-      let clss;
-      data.forEach(function (d) {
-        graph.nodes.push({ "name": d.source });
-        graph.nodes.push({ "name": d.target });
+    d3.json("./myJson.json", function (data) {
+    
+      //set up data in same style as original example but empty
+      let clss = new Array;
+      let shared = new Array
+      data.nodes.forEach(function (e) {
 
-        switch (d.class) {
-          case "Class1": clss = "C1";
-            break;
-          case "Class2": clss = "C2";
-            break;
-          case "Class3": clss = "C3"
-        }
-
-
-        graph.links.push({
-          "source": d.source,
-          "target": d.target,
-          "value": +d.value,
-          "clss": clss
-        });
-      });
+        clss.push(e.classname);
+        shared.push(e.shared);
+      }); 
 
       // return only the distinct / unique nodes
-      graph.nodes = d3.keys(d3.nest()
+      data.nodes = d3.keys(d3.nest()
         .key(function (d) { return d.name; })
-        .object(graph.nodes));
-
-      // loop through each link replacing the text with its index from node
-      graph.links.forEach(function (d, i) {
-        graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
-        graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
+        .object(data.nodes));
+     
+      // // loop through each link replacing the text with its index from node
+      data.links.forEach(function (d, i) {
+        data.links[i].source = data.nodes.indexOf(data.links[i].source);
+        data.links[i].target = data.nodes.indexOf(data.links[i].target);
       });
 
-      // now loop through each nodes to make nodes an array of objects
-      // rather than an array of strings
-      graph.nodes.forEach(function (d, i) {
-        graph.nodes[i] = { "name": d };
+      // // now loop through each nodes to make nodes an array of objects
+      // // rather than an array of strings
+      data.nodes.forEach(function (d, i) {
+
+        data.nodes[i] = { "name": d, "classname": clss[i], "shared": shared[i] };
       });
 
       sankey
-        .nodes(graph.nodes)
-        .links(graph.links)
+        .nodes(data.nodes)
+        .links(data.links)
         .layout(32);
 
       // add in the links
       /*
            var link = svg.append("g").selectAll(".link")
-        .data(graph.links)
+        .data(data.links)
         .enter().append("path")
         .attr("class", "link")
         .attr("d", path)
@@ -146,32 +225,47 @@
       
       */
 
-      function nbLayer() {
-        var dejavu = []; var cpt = 0;
-        graph.nodes.forEach(e => {
-          let name = e.name.split(".");
-          if (!(dejavu.includes(name[0]))) {
-            dejavu.push(name[0]); cpt++;
-          }
-        });
-        return [cpt,dejavu];
-      }
-      Layers = nbLayer();
-      
-
       var link = svg.append("g").selectAll(".link")
-        .data(graph.links)
+
+        .data(data.links)
         .enter().append("path")
         .attr("class", function (d) {
-          if (d.clss == "C1") {
+          if (d.classname == "C0") {
+            return "linkC0";
+          }
+          if (d.classname == "C1") {
             return "linkC1";
           }
-          if (d.clss == "C2") {
+          if (d.classname == "C2") {
             return "linkC2";
           }
-          if (d.clss == "C3") {
+          if (d.classname == "C3") {
             return "linkC3";
           }
+          if (d.classname == "C4") {
+            return "linkC4";
+          }
+          if (d.classname == "C5") {
+            return "linkC5";
+          }
+          if (d.classname == "C6") {
+            return "linkC6";
+          }
+          if (d.classname == "C7") {
+            return "linkC7";
+          }
+          if (d.classname == "C8") {
+            return "linkC8";
+          } if (d.classname == "C9") {
+            return "linkC9";
+          }
+          if (d.classname == "C10") {
+            return "linkC10";
+          }
+          if (d.classname == "C11") {
+            return "linkC11";
+          }
+
         })
         .attr("d", path)
         .style("stroke-width", function (d) { return Math.max(1, d.dy); })
@@ -184,10 +278,16 @@
         });
 
       // add in the nodes
+      var srcNode = new Array
       var node = svg.append("g").selectAll(".node")
-        .data(graph.nodes)
+        .data(data.nodes)
         .enter().append("g")
-        .attr("class", "node")
+        .attr('id', function (d) { return d.name; })
+        .attr("shared", function (d) {
+          srcNode.push(sourceSharedLinks(d.name, data.links))
+       
+          return d.shared;
+        })
         .attr("transform", function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         })
@@ -200,42 +300,75 @@
           })
           .on("drag", dragmove));
 
-      // add the rectangles for the nodes
-      node.append("rect")
-        .attr("height", function (d) { return d.dy; })
-        .attr("width", sankey.nodeWidth())
-        .style("fill", function (d) {
-          if (d.name.includes("Layer1")) {
-            return "#120011";
-          }
-          if (d.name.includes("Layer2")) {
-            return "#380033";
-          }
-          if (d.name.includes("Layer3")) {
-            return "#5e0056";
-          }
-
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(d.color).darker(2);
-        })
-        .append("title")
-        .text(function (d) {
-          return d.name + "\n" + format(d.value);
+      
+      console.log(srcNode)
+      srcNode.forEach(srcE => {
+        console.log(srcE.length)
+        if (srcE.length > 1) {
+        let colors = new Array;
+        var defs = node.append('defs')
+        var mainGradient = defs.append('linearGradient')
+          .attr('x1', '0%')
+          .attr('y1', '0%')
+          .attr('x2', '0%')
+          .attr('y2', '100%')
+          .attr('id', function (d) {
+            return 'mainGradient' + d.name;
+          });
+        let nbStop =0;
+        let totalValue = 0;
+        let values = new Array
+        data.nodes.forEach(e => {
+          srcNode.forEach(e2 => {
+            if (e.name == e2.name) {
+              colors.push(getClassColor(e2.name));
+              nbStop++;
+              values.push(e.value);
+              totalValue += e.value;
+            }
+          });
         });
+        // Create the stops of the main gradient. Each stop will be assigned
+        // a class to style the stop using CSS.
 
-      // add in the title for the nodes
-      node.append("text")
-        .attr("x", -6)
-        .attr("y", function (d) { return d.dy / 2; })
-        .attr("dy", ".35em")
-        .attr("text-anchor", "end")
-        .attr("transform", null)
-        .text(function (d) { let name = d.name.split("."); return name[1]; })
-        .filter(function (d) { return d.x < width / 2; })
-        .attr("x", 6 + sankey.nodeWidth())
-        .attr("text-anchor", "start");
+        for(let i =0; i<nbStop;i++){
+          mainGradient.append('stop')
+          .attr("style", "stop-color:"+colors[i])
+          .attr('offset',(values[1]*100)/totalValue);
+        
+        }
+        // add the rectangles for the nodes
 
+      } else {
+
+        node.append("rect")
+          .attr("class", function (d) { return "node-" + d.classname; })
+          .attr("height", function (d) { return d.dy; })
+          .attr("width", sankey.nodeWidth())
+          .style("fill", function (d) {
+            return getClassColor(d.classname);
+          })
+          .style("stroke", function (d) {
+            return d3.rgb(d.color).darker(2);
+          })
+          .append("title")
+          .text(function (d) {
+            return d.name + "\n" + format(d.value);
+          });
+        // add in the title for the nodes
+        node.append("text")
+          .attr("x", -6)
+          .attr("y", function (d) { return d.dy / 2; })
+          .attr("dy", ".35em")
+          .attr("text-anchor", "end")
+          .attr("transform", null)
+          .text(function (d) { return d.name; })
+          .filter(function (d) { return d.x < width / 2; })
+          .attr("x", 6 + sankey.nodeWidth())
+          .attr("text-anchor", "start");
+      }
+      });
+      
       // the function for moving the nodes
       function dragmove(d) {
         d3.select(this)
@@ -252,6 +385,55 @@
     // var elem = document.createElement('div').setAttribute("class",".layer")
     // document.body.appendChild(elem)
 
+    function sourceSharedLinks(name, linksArray) {
+      var sourceArray = new Array;
+      linksArray.forEach(e => {
+        if (e.target.name == name) {
+          sourceArray.push(e.target.name);
+        }
+      })
+      
+      return sourceArray;
+    }
+    function getClassColor(classname) {
+      if (classname == "C0") {
+        return " #b0000b";
+      }
+      if (classname == "C1") {
+        return "#527fff";
+      }
+      if (classname == "C2") {
+        return "#ff5a0c";
+      }
+      if (classname == "C3") {
+        return "#65c347";
+      }
+      if (classname == "C4") {
+        return "#8c007c";
+      }
+      if (classname == "C5") {
+        return "#cbbf2d";
+      }
+      if (classname == "C6") {
+        return "#007840";
+      }
+      if (classname == "C7") {
+        return "#e33782";
+      }
+      if (classname == "C8") {
+        return "#bb52d1";
+      } if (classname == "C9") {
+        return "#00088b";
+      }
+      if (classname == "C10") {
+        return "#e24942";
+      }
+      if (classname == "C11") {
+        return "#180101";
+      }
+    }
   </script>
 
 </body>
+<!-- 
+ -->
