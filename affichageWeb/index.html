@@ -179,7 +179,7 @@
 
     // load the data
     d3.json("./myJson.json", function (data) {
-    
+
       //set up data in same style as original example but empty
       let clss = new Array;
       let shared = new Array
@@ -187,13 +187,13 @@
 
         clss.push(e.classname);
         shared.push(e.shared);
-      }); 
+      });
 
       // return only the distinct / unique nodes
       data.nodes = d3.keys(d3.nest()
         .key(function (d) { return d.name; })
         .object(data.nodes));
-     
+
       // // loop through each link replacing the text with its index from node
       data.links.forEach(function (d, i) {
         data.links[i].source = data.nodes.indexOf(data.links[i].source);
@@ -279,15 +279,26 @@
 
       // add in the nodes
       var srcNode = new Array
+      var sharedNode = new Array
+      var nonSharedNode = new Array
+      data.nodes.forEach(e => {
+        if (e.shared == "true") {
+          let sharedSources = sourceSharedLinks(e.name, data.links)
+          if (sharedSources.length > 1) {
+            srcNode.push(sharedSources);
+            sharedNode.push(e);
+          } else {
+            nonSharedNode.push(e);
+          }
+        } else {
+          nonSharedNode.push(e);
+        }
+      });
+      /*********************************************************/
       var node = svg.append("g").selectAll(".node")
-        .data(data.nodes)
+        .data(sharedNode)
         .enter().append("g")
         .attr('id', function (d) { return d.name; })
-        .attr("shared", function (d) {
-          srcNode.push(sourceSharedLinks(d.name, data.links))
-       
-          return d.shared;
-        })
         .attr("transform", function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         })
@@ -300,11 +311,11 @@
           })
           .on("drag", dragmove));
 
+
       
-      console.log(srcNode)
       srcNode.forEach(srcE => {
-        console.log(srcE.length)
-        if (srcE.length > 1) {
+        console.log('srcE:' )
+        console.log(srcE )
         let colors = new Array;
         var defs = node.append('defs')
         var mainGradient = defs.append('linearGradient')
@@ -315,38 +326,34 @@
           .attr('id', function (d) {
             return 'mainGradient' + d.name;
           });
-        let nbStop =0;
-        let totalValue = 0;
-        let values = new Array
-        data.nodes.forEach(e => {
-          srcNode.forEach(e2 => {
-            if (e.name == e2.name) {
-              colors.push(getClassColor(e2.name));
-              nbStop++;
-              values.push(e.value);
-              totalValue += e.value;
-            }
-          });
-        });
-        // Create the stops of the main gradient. Each stop will be assigned
-        // a class to style the stop using CSS.
+        let nbStop = 0;
+        let totalValue = Number(0);
+        let values = new Array;
 
-        for(let i =0; i<nbStop;i++){
+          srcE.forEach(el => {
+            colors.push(getClassColor(el.classname));
+            nbStop++;
+            values.push(Number(el.value));
+            totalValue += Number(el.value);
+          }); console.log(totalValue)
+          for (let i = 0; i < nbStop; i++) {
           mainGradient.append('stop')
-          .attr("style", "stop-color:"+colors[i])
-          .attr('offset',(values[1]*100)/totalValue);
-        
+            .attr("style", "stop-color:" + colors[i])
+            .attr('offset', (values[i] / totalValue) *100 +"%" );   
         }
+        nbStop=0;
+        values = new Array;
+        totalValue = 0;
+        
+        console.log('values ' + values)
+       
         // add the rectangles for the nodes
-
-      } else {
-
         node.append("rect")
           .attr("class", function (d) { return "node-" + d.classname; })
           .attr("height", function (d) { return d.dy; })
           .attr("width", sankey.nodeWidth())
           .style("fill", function (d) {
-            return getClassColor(d.classname);
+            return "url(#mainGradient" + d.name + ")";
           })
           .style("stroke", function (d) {
             return d3.rgb(d.color).darker(2);
@@ -366,9 +373,113 @@
           .filter(function (d) { return d.x < width / 2; })
           .attr("x", 6 + sankey.nodeWidth())
           .attr("text-anchor", "start");
-      }
+
       });
-      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      var node = svg.append("g").selectAll(".node")
+        .data(nonSharedNode)
+        .enter().append("g")
+        .attr('id', function (d) { return d.name; })
+        .attr("transform", function (d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        })
+        .call(d3.drag()
+          .subject(function (d) {
+            return d;
+          })
+          .on("start", function () {
+            this.parentNode.appendChild(this);
+          })
+          .on("drag", dragmove));
+
+      node.append("rect")
+        .attr("class", function (d) { return "node-" + d.classname; })
+        .attr("height", function (d) { return d.dy; })
+        .attr("width", sankey.nodeWidth())
+        .style("fill", function (d) {
+          return getClassColor(d.classname);
+        })
+        .style("stroke", function (d) {
+          return d3.rgb(d.color).darker(2);
+        })
+        .append("title")
+        .text(function (d) {
+          return d.name + "\n" + format(d.value);
+        });
+      // add in the title for the nodes
+      node.append("text")
+        .attr("x", -6)
+        .attr("y", function (d) { return d.dy / 2; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .attr("transform", null)
+        .text(function (d) { return d.name; })
+        .filter(function (d) { return d.x < width / 2; })
+        .attr("x", 6 + sankey.nodeWidth())
+        .attr("text-anchor", "start");
+
       // the function for moving the nodes
       function dragmove(d) {
         d3.select(this)
@@ -382,6 +493,7 @@
         link.attr("d", path);
       }
     });
+
     // var elem = document.createElement('div').setAttribute("class",".layer")
     // document.body.appendChild(elem)
 
@@ -389,10 +501,13 @@
       var sourceArray = new Array;
       linksArray.forEach(e => {
         if (e.target.name == name) {
-          sourceArray.push(e.target.name);
+          sourceArray.push({
+            "name": e.source.name,
+            "classname": e.classname, "value": e.value
+          });
         }
       })
-      
+
       return sourceArray;
     }
     function getClassColor(classname) {
