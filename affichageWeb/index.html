@@ -178,7 +178,7 @@
     var path = sankey.link();
 
     // load the data
-    d3.json("./myJson.json", function (data) {
+    d3.json("./mnist.json", function (data) {
 
       //set up data in same style as original example but empty
       let clss = new Array;
@@ -375,67 +375,6 @@
           .attr("text-anchor", "start");
 
       });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
       var node = svg.append("g").selectAll(".node")
