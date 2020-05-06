@@ -178,7 +178,7 @@
     var path = sankey.link();
 
     // load the data
-    d3.json("./iris10layers.json", function (data) {
+    d3.json("./mnist.json", function (data) {
 
       //set up data in same style as original example but empty
       let clss = new Array;
@@ -312,41 +312,11 @@
           .on("drag", dragmove));
 
 
-      var setup = {} ;
+      
       srcNode.forEach(srcE => {
-        console.log('srcE:')
-        console.log(srcE)
-        
-        setup.append()
+        console.log('srcE:' )
+        console.log(srcE )
         let colors = new Array;
-        
-        let nbStop = 0;
-        let totalValue = Number(0);
-        let values = new Array;
-
-        srcE.forEach(el => {
-          colors.push(getClassColor(el.classname));
-          nbStop++;
-          values.push(Number(el.value));
-          totalValue += Number(el.value);
-        }); console.log(totalValue)
-       
-        nbStop = 0;
-        values = new Array;
-        totalValue = 0;
-
-        console.log('values ' + values)
-
-
-
-      });
-
-
-
-
-
-
-      //{
         var defs = node.append('defs')
         var mainGradient = defs.append('linearGradient')
           .attr('x1', '0%')
@@ -356,45 +326,56 @@
           .attr('id', function (d) {
             return 'mainGradient' + d.name;
           });
-        //}
-      for (let i = 0; i < nbStop; i++) {
+        let nbStop = 0;
+        let totalValue = Number(0);
+        let values = new Array;
+
+          srcE.forEach(el => {
+            colors.push(getClassColor(el.classname));
+            nbStop++;
+            values.push(Number(el.value));
+            totalValue += Number(el.value);
+          }); console.log(totalValue)
+          for (let i = 0; i < nbStop; i++) {
           mainGradient.append('stop')
             .attr("style", "stop-color:" + colors[i])
-            .attr('offset', (values[i] / totalValue) * 100 + "%");
+            .attr('offset', (values[i] / totalValue) *100 +"%" );   
         }
+        nbStop=0;
+        values = new Array;
+        totalValue = 0;
+        
+        console.log('values ' + values)
+       
+        // add the rectangles for the nodes
+        node.append("rect")
+          .attr("class", function (d) { return "node-" + d.classname; })
+          .attr("height", function (d) { return d.dy; })
+          .attr("width", sankey.nodeWidth())
+          .style("fill", function (d) {
+            return "url(#mainGradient" + d.name + ")";
+          })
+          .style("stroke", function (d) {
+            return d3.rgb(d.color).darker(2);
+          })
+          .append("title")
+          .text(function (d) {
+            return d.name + "\n" + format(d.value);
+          });
+        // add in the title for the nodes
+        node.append("text")
+          .attr("x", -6)
+          .attr("y", function (d) { return d.dy / 2; })
+          .attr("dy", ".35em")
+          .attr("text-anchor", "end")
+          .attr("transform", null)
+          .text(function (d) { return d.name; })
+          .filter(function (d) { return d.x < width / 2; })
+          .attr("x", 6 + sankey.nodeWidth())
+          .attr("text-anchor", "start");
 
-      // add the rectangles for the nodes
-      node.append("rect")
-        .attr("class", function (d) { return "node-" + d.classname; })
-        .attr("height", function (d) { return d.dy; })
-        .attr("width", sankey.nodeWidth())
-        .style("fill", function (d) {
-          return "url(#mainGradient" + d.name + ")";
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(d.color).darker(2);
-        })
-        .append("title")
-        .text(function (d) {
-          return d.name + "\n" + format(d.value);
-        });
-      // add in the title for the nodes
-      node.append("text")
-        .attr("x", -6)
-        .attr("y", function (d) { return d.dy / 2; })
-        .attr("dy", ".35em")
-        .attr("text-anchor", "end")
-        .attr("transform", null)
-        .text(function (d) { return d.name; })
-        .filter(function (d) { return d.x < width / 2; })
-        .attr("x", 6 + sankey.nodeWidth())
-        .attr("text-anchor", "start");
+      });
 
-
-
-
-
-      ////////////////////////////////////////////////////////
 
       var node = svg.append("g").selectAll(".node")
         .data(nonSharedNode)
