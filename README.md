@@ -19,7 +19,7 @@ Les technologie utilisées sont:
 
 Pour utiliser le logiciel dans de bonnes conditions, nous vous recommandons d'utiliser la version version 3.6.9 de Python, 1.0.0 de Jupyter, 0.22.1 de scikit-learn, 1.0.1 de pandas, 1.12.0 de tensorflow, 1.18.1 de numpy, 2.2.4 et 4.x.x de d3js.
 
-Si le notebook ne parvient pas à les crééer, il vous faut crééer les dossiers KmeansI et KmeansM, et faire de même pour tout les dossiers qui ne seraient pas présents. Par ailleurs il est imperatif d'avoir uniquement les fichiers de résultats par layers dans les dossiers de jeux de test (KmeansI/nom_du_dossier_layer_Iris et KmeansI/nom_du_dossier_layer_Iristest par exemple) lors que l'exécution de l'algorithme qui récupère les fichiers, autrement le code plantera.
+Si le notebook ne parvient pas à les créer, il vous faut créer les dossiers KmeansI et KmeansM, et faire de même pour tout les dossiers qui ne seraient pas présents. Par ailleurs il est imperatif d'avoir uniquement les fichiers de résultats par layers dans les dossiers de jeux de test (KmeansI/nom_du_dossier_layer_Iris et KmeansI/nom_du_dossier_layer_Iristest par exemple) lors que l'exécution de l'algorithme qui récupère les fichiers, autrement le code plantera.
 
 Une vidéo de présentation de notre application est dispoible à l'addresse : https://youtu.be/-cfFWJnAjCo.
 
